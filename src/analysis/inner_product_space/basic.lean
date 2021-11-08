@@ -1558,6 +1558,13 @@ begin
     hV.inner_right_dfinsupp] using this,
 end
 
+/-- The composition of an orthogonal family of subspaces with an injective function is also an
+orthogonal family. -/
+lemma orthogonal_family.comp (hV : orthogonal_family 𝕜 V) {γ : Type*} {f : γ → ι}
+  (hf : function.injective f) :
+  orthogonal_family 𝕜 (V ∘ f) :=
+λ i j hij v hv w hw, hV (hf.ne hij) hv hw
+
 lemma orthogonal_family.orthonormal_sigma_orthonormal (hV : orthogonal_family 𝕜 V) {α : ι → Type*}
   {v_family : Π i, (α i) → V i} (hv_family : ∀ i, orthonormal 𝕜 (v_family i)) :
   orthonormal 𝕜 (λ a : Σ i, α i, (v_family a.1 a.2 : E)) :=
@@ -1865,5 +1872,12 @@ begin
   rw ← eq_conj_iff_real,
   exact hT.conj_inner_sym x x
 end
+
+/-- If a self-adjoint operator preserves a submodule, its restriction to that submodule is
+self-adjoint. -/
+lemma is_self_adjoint.restrict_invariant {T : E →ₗ[𝕜] E} (hT : is_self_adjoint T)
+  {V : submodule 𝕜 E} (hV : ∀ v ∈ V, T v ∈ V) :
+  is_self_adjoint (T.restrict hV) :=
+λ v w, hT v w
 
 end is_self_adjoint
