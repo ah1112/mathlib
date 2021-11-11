@@ -158,11 +158,9 @@ orthonormal basis of eigenvectors for a self-adjoint operator `T` on `E`. -/
 noncomputable def diagonalization_basis {n : ℕ} (hn : finite_dimensional.finrank 𝕜 E = n) :
   E ≃ₗᵢ[𝕜] euclidean_space 𝕜 (fin n) :=
 basis.isometry_euclidean_of_orthonormal
-  (@direct_sum.submodule_is_internal.subordinate_orthonormal_basis
-  _ _ _ _ _ _ hn (eigenvalues T) _ _
-  (by convert hT.direct_sum_submodule_is_internal))
-  (direct_sum.submodule_is_internal.subordinate_orthonormal_basis_orthonormal hn _
-  hT.orthogonal_family_eigenspaces')
+  (hT.direct_sum_submodule_is_internal.subordinate_orthonormal_basis hn)
+  (hT.direct_sum_submodule_is_internal.subordinate_orthonormal_basis_orthonormal hn
+    hT.orthogonal_family_eigenspaces')
 
 /-- An isometry from an inner product space `E` to Euclidean space, induced by a choice of
 orthonormal basis of eigenvectors for a self-adjoint operator `T` on `E`. -/
@@ -170,25 +168,18 @@ noncomputable def eigenvalues_diagonalization_basis {n : ℕ}
   (hn : finite_dimensional.finrank 𝕜 E = n) (i : fin n) :
   ℝ :=
 @is_R_or_C.re 𝕜 _ $
-  (@direct_sum.submodule_is_internal.subordinate_orthonormal_basis_index
-  _ _ _ _ _ _ hn (eigenvalues T) _ _
-  (by convert hT.direct_sum_submodule_is_internal))
-  i
+  (hT.direct_sum_submodule_is_internal.subordinate_orthonormal_basis_index hn) i
 
 lemma foo {n : ℕ}
   (hn : finite_dimensional.finrank 𝕜 E = n) (i : fin n) :
   (hT.diagonalization_basis hn).symm (λ j, ite (j = i) 1 0)
   ∈ eigenspace T (hT.eigenvalues_diagonalization_basis hn i) :=
 begin
-  simp [diagonalization_basis, ite_smul, finset.sum_ite_eq],
-  have := @direct_sum.submodule_is_internal.subordinate_orthonormal_basis_subordinate
-    _ _ _ _ _ _ hn (eigenvalues T) _ _
-    (by convert hT.direct_sum_submodule_is_internal),
-  -- have := direct_sum.submodule_is_internal.subordinate_orthonormal_basis_subordinate hn
-  --   (by convert hT.direct_sum_submodule_is_internal) i,
-  -- have := @finset.sum_ite_eq 𝕜 (fin n) _ _ finset.univ i 1,
-  -- rw this,
-
+  convert hT.direct_sum_submodule_is_internal.subordinate_orthonormal_basis_subordinate hn i,
+  { simp [diagonalization_basis, ite_smul, finset.sum_ite_eq] },
+  { simp [eigenvalues_diagonalization_basis, ite_smul, finset.sum_ite_eq],
+    -- ok since real
+   },
 end
 
 end is_self_adjoint

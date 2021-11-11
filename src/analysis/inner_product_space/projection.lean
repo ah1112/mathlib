@@ -45,7 +45,7 @@ The Coq code is available at the following address: <http://www.lri.fr/~sboldo/e
 noncomputable theory
 
 open is_R_or_C real filter
-open_locale big_operators classical topological_space
+open_locale big_operators topological_space
 
 variables {𝕜 E F : Type*} [is_R_or_C 𝕜]
 variables [inner_product_space 𝕜 E] [inner_product_space ℝ F]
@@ -1046,8 +1046,8 @@ by { simp only [fin_orthonormal_basis, basis.coe_reindex], assumption }, -- why 
 
 section subordinate_orthonormal_basis
 open direct_sum
-variables {n : ℕ} (hn : finrank 𝕜 E = n) {ι : Type*} [fintype ι] {V : ι → submodule 𝕜 E}
-  (hV : submodule_is_internal V)
+variables {n : ℕ} (hn : finrank 𝕜 E = n) {ι : Type*} [fintype ι] [dec_ι : decidable_eq ι]
+  {V : ι → submodule 𝕜 E} (hV : submodule_is_internal V)
 
 /-- Exhibit a bijection between `fin n` and the index set of a certain basis of an `n`-dimensional
 inner product space `E`.  This should not be accessed directly, but only via the subsequent API. -/

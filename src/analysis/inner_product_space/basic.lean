@@ -68,7 +68,7 @@ The Coq code is available at the following address: <http://www.lri.fr/~sboldo/e
 noncomputable theory
 
 open is_R_or_C real filter
-open_locale big_operators classical topological_space complex_conjugate
+open_locale big_operators topological_space complex_conjugate
 
 variables {𝕜 E F : Type*} [is_R_or_C 𝕜]
 
@@ -379,7 +379,7 @@ end
 
 /-! ### Properties of inner product spaces -/
 
-variables [inner_product_space 𝕜 E] [inner_product_space ℝ F]
+variables [inner_product_space 𝕜 E] [dec_E : decidable_eq E] [inner_product_space ℝ F]
 local notation `⟪`x`, `y`⟫` := @inner 𝕜 _ _ x y
 local notation `IK` := @is_R_or_C.I 𝕜 _
 local notation `absR` := has_abs.abs
@@ -667,7 +667,7 @@ end
 end basic_properties
 
 section orthonormal_sets
-variables {ι : Type*} (𝕜)
+variables {ι : Type*} [dec_ι : decidable_eq ι] (𝕜)
 
 include 𝕜
 
@@ -679,6 +679,7 @@ omit 𝕜
 
 variables {𝕜}
 
+include dec_ι
 /-- `if ... then ... else` characterization of an indexed set of vectors being orthonormal.  (Inner
 product equals Kronecker delta.) -/
 lemma orthonormal_iff_ite {v : ι → E} :
@@ -699,7 +700,9 @@ begin
     { intros i j hij,
       simpa [hij] using h i j } }
 end
+omit dec_ι
 
+include dec_E
 /-- `if ... then ... else` characterization of a set of vectors being orthonormal.  (Inner product
 equals Kronecker delta.) -/
 theorem orthonormal_subtype_iff_ite {s : set E} :
@@ -715,19 +718,20 @@ begin
     convert h v hv w hw using 1,
     simp }
 end
+omit dec_E
 
 /-- The inner product of a linear combination of a set of orthonormal vectors with one of those
 vectors picks out the coefficient of that vector. -/
 lemma orthonormal.inner_right_finsupp {v : ι → E} (hv : orthonormal 𝕜 v) (l : ι →₀ 𝕜) (i : ι) :
   ⟪v i, finsupp.total ι E 𝕜 v l⟫ = l i :=
-by simp [finsupp.total_apply, finsupp.inner_sum, orthonormal_iff_ite.mp hv]
+by classical; simp [finsupp.total_apply, finsupp.inner_sum, orthonormal_iff_ite.mp hv]
 
 /-- The inner product of a linear combination of a set of orthonormal vectors with one of those
 vectors picks out the coefficient of that vector. -/
 lemma orthonormal.inner_right_fintype [fintype ι]
   {v : ι → E} (hv : orthonormal 𝕜 v) (l : ι → 𝕜) (i : ι) :
   ⟪v i, ∑ i : ι, (l i) • (v i)⟫ = l i :=
-by simp [inner_sum, inner_smul_right, orthonormal_iff_ite.mp hv]
+by classical; simp [inner_sum, inner_smul_right, orthonormal_iff_ite.mp hv]
 
 /-- The inner product of a linear combination of a set of orthonormal vectors with one of those
 vectors picks out the coefficient of that vector. -/
@@ -740,7 +744,7 @@ vectors picks out the coefficient of that vector. -/
 lemma orthonormal.inner_left_fintype [fintype ι]
   {v : ι → E} (hv : orthonormal 𝕜 v) (l : ι → 𝕜) (i : ι) :
   ⟪∑ i : ι, (l i) • (v i), v i⟫ = conj (l i) :=
-by simp [sum_inner, inner_smul_left, orthonormal_iff_ite.mp hv]
+by classical; simp [sum_inner, inner_smul_left, orthonormal_iff_ite.mp hv]
 
 /--
 The double sum of weighted inner products of pairs of vectors from an orthonormal sequence is the
@@ -748,12 +752,13 @@ sum of the weights.
 -/
 lemma orthonormal.inner_left_right_finset {s : finset ι}  {v : ι → E} (hv : orthonormal 𝕜 v)
   {a : ι → ι → 𝕜} : ∑ i in s, ∑ j in s, (a i j) • ⟪v j, v i⟫ = ∑ k in s, a k k :=
-by simp [orthonormal_iff_ite.mp hv, finset.sum_ite_of_true]
+by classical; simp [orthonormal_iff_ite.mp hv, finset.sum_ite_of_true]
 
 /-- An orthonormal set is linearly independent. -/
 lemma orthonormal.linear_independent {v : ι → E} (hv : orthonormal 𝕜 v) :
   linear_independent 𝕜 v :=
 begin
+  classical,
   rw linear_independent_iff,
   intros l hl,
   ext i,
@@ -764,9 +769,11 @@ end
 /-- A subfamily of an orthonormal family (i.e., a composition with an injective map) is an
 orthonormal family. -/
 lemma orthonormal.comp
-  {ι' : Type*} {v : ι → E} (hv : orthonormal 𝕜 v) (f : ι' → ι) (hf : function.injective f) :
+  {ι' : Type*} [decidable_eq ι'] {v : ι → E} (hv : orthonormal 𝕜 v) (f : ι' → ι)
+  (hf : function.injective f) :
   orthonormal 𝕜 (v ∘ f) :=
 begin
+  classical,
   rw orthonormal_iff_ite at ⊢ hv,
   intros i j,
   convert hv (f i) (f j) using 1,
@@ -780,6 +787,7 @@ lemma orthonormal.inner_finsupp_eq_zero
   (hl : l ∈ finsupp.supported 𝕜 𝕜 s) :
   ⟪finsupp.total ι E 𝕜 v l, v i⟫ = 0 :=
 begin
+  classical,
   rw finsupp.mem_supported' at hl,
   simp [hv.inner_left_finsupp, hl i hi],
 end
@@ -790,13 +798,14 @@ adapted from the corresponding development of the theory of linearly independent
 
 variables (𝕜 E)
 lemma orthonormal_empty : orthonormal 𝕜 (λ x, x : (∅ : set E) → E) :=
-by simp [orthonormal_subtype_iff_ite]
+by classical; simp [orthonormal_subtype_iff_ite]
 variables {𝕜 E}
 
 lemma orthonormal_Union_of_directed
   {η : Type*} {s : η → set E} (hs : directed (⊆) s) (h : ∀ i, orthonormal 𝕜 (λ x, x : s i → E)) :
   orthonormal 𝕜 (λ x, x : (⋃ i, s i) → E) :=
 begin
+  classical,
   rw orthonormal_subtype_iff_ite,
   rintros x ⟨_, ⟨i, rfl⟩, hxi⟩ y ⟨_, ⟨j, rfl⟩, hyj⟩,
   obtain ⟨k, hik, hjk⟩ := hs i j,
@@ -1489,7 +1498,7 @@ instance submodule.inner_product_space (W : submodule 𝕜 E) : inner_product_sp
 /-! ### Families of mutually-orthogonal subspaces of an inner product space -/
 
 section orthogonal_family
-variables {ι : Type*} (𝕜)
+variables {ι : Type*} [dec_ι : decidable_eq ι] (𝕜)
 open_locale direct_sum
 
 /-- An indexed family of mutually-orthogonal subspaces of an inner product space `E`. -/
@@ -1498,6 +1507,7 @@ def orthogonal_family (V : ι → submodule 𝕜 E) : Prop :=
 
 variables {𝕜} {V : ι → submodule 𝕜 E}
 
+include dec_ι
 lemma orthogonal_family.eq_ite (hV : orthogonal_family 𝕜 V) {i j : ι} (v : V i) (w : V j) :
   ⟪(v:E), w⟫ = ite (i = j) ⟪(v:E), w⟫ 0 :=
 begin
@@ -1505,7 +1515,9 @@ begin
   { refl },
   { exact hV h v.prop w.prop }
 end
+-- omit dec_ι
 
+include dec_E
 lemma orthogonal_family.inner_right_dfinsupp (hV : orthogonal_family 𝕜 V)
   (l : Π₀ i, V i) (i : ι) (v : V i) :
   ⟪(v : E), dfinsupp.lsum ℕ (λ i, (V i).subtype) l⟫ = ⟪v, l i⟫ :=
@@ -1530,10 +1542,12 @@ begin
   intros h,
   simp [h]
 end
+omit dec_ι dec_E
 
 lemma orthogonal_family.inner_right_fintype
   [fintype ι] (hV : orthogonal_family 𝕜 V) (l : Π i, V i) (i : ι) (v : V i) :
   ⟪(v : E), ∑ j : ι, l j⟫ = ⟪v, l i⟫ :=
+by classical;
 calc ⟪(v : E), ∑ j : ι, l j⟫
     = ∑ j : ι, ⟪(v : E), l j⟫: by rw inner_sum
 ... = ∑ j, ite (i = j) ⟪(v : E), l j⟫ 0 :
@@ -1546,6 +1560,7 @@ pairwise intersections of elements of the family are 0. -/
 lemma orthogonal_family.independent (hV : orthogonal_family 𝕜 V) :
   complete_lattice.independent V :=
 begin
+  classical,
   apply complete_lattice.independent_of_dfinsupp_lsum_injective,
   rw [← @linear_map.ker_eq_bot _ _ _ _ _ _ (direct_sum.add_comm_group (λ i, V i)),
     submodule.eq_bot_iff],
@@ -1580,11 +1595,13 @@ begin
   { exact hV hij (v_family i vi : V i).prop (v_family j vj : V j).prop }
 end
 
+include dec_ι
 lemma direct_sum.submodule_is_internal.collected_basis_orthonormal (hV : orthogonal_family 𝕜 V)
   (hV_sum : direct_sum.submodule_is_internal V) {α : ι → Type*}
   {v_family : Π i, basis (α i) 𝕜 (V i)} (hv_family : ∀ i, orthonormal 𝕜 (v_family i)) :
   orthonormal 𝕜 (hV_sum.collected_basis v_family) :=
 by simpa using hV.orthonormal_sigma_orthonormal hv_family
+omit dec_ι
 
 end orthogonal_family
 
