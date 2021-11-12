@@ -275,10 +275,6 @@ end
 theorem tan1 (a b c: point) (hab: a≠ b) (hbc: b≠ c): ∃ (α β : circle), ∃ ( d: point), center a α ∧ center d β ∧ oncircle b α
   ∧ oncircle b β ∧ B a b d ∧ length  d b= length c b:=
 begin
-  let C:= length a b,
-  let A:= length b c,
-  let B:= length a c,
-  wlog h : (A ≤ B ∧ B≤ C) using [A B C, A C B , B A C, B C A, C A B, C B A], exact tripleorder A B C,
   rcases LC2 a b hab with ⟨α, cena, ona ⟩ ,
   use α ,
   rcases excor a b c hab hbc with ⟨ b1, Babb1, len⟩ ,
@@ -324,12 +320,33 @@ begin
   have := (DS4 a b c α acen bcirc).1,finish,
 end
 
+/-
+theorem junk (a b c : point): :=
+  begin
+  let C: ℝ := length a d,have  Chyp :C= length a d,exact rfl,
+  let A:= length d c',
+  let B:= length a c',
+  wlog h : (A ≤ B ∧ B≤ C) using [A B C, A C B , B A C, B C A, C A B, C B A], exact tripleorder A B C,
+
+  end
+-/
+
+
 theorem tan2 (a d c' : point)(had: a≠ d) (hdc: d≠ c')(hac: a≠ c'): ∃ (α β γ : circle),∃ (a1 b1 c1 d1 e1 f1 : point),
   center a1 α ∧ center b1 β ∧ center c1 γ
   ∧ oncircle d1 α ∧ oncircle d1 β ∧ oncircle e1 α ∧ oncircle e1 γ ∧ oncircle f1 β ∧ oncircle f1 γ
   ∧ B a1 d1 b1 ∧ B a1 e1 c1 ∧ B b1 f1 c1
   ∧ length a1 d1 = length a d ∧ length b1 d1 = length d c' ∧ length c1 e1 = length a c' :=
   begin
+
+  /-
+  let A:= length d c',
+  let B:= length a c',
+  let C:= length a d,
+  have := tripleorder  (length d c') (length a c') (length a d) ,
+  wlog h : (length d c' ≤ length a c' ∧ length a c'≤ length a d) using [A B C, A C B , B A C, B C A, C A B, C B A], --exact tripleorder (length d c') (length a c') (length a d),
+  -/
+
     rcases tan1 a d c' had hdc with ⟨α,β,b,acen,bcen,dona,donb,Badb,len⟩ ,
 
     rcases excor2 d a d a (ne.symm had) had (ne.symm had) with ⟨e,Bdae,len2 ⟩,
@@ -428,6 +445,13 @@ theorem tan3 (a' b' c' a b c d e f: point)(α β γ : circle) : a'≠ b' → b'�
 ∧ oncircle i γ ∧ oncircle i ζ ∧ B a g z ∧ B b h z ∧ B c i z :=
 begin
 intros hab1 hbc1 hac1 acen bcen ccen dcirca dcircb ecirca ecircc fcircb fcircc Badb Baec Bbfc len1 len2 len3,
-
 rcases LC1 d f _ with ⟨L,dL,fL ⟩,
+rcases LC1 a c (B1 a e c Baec).2.2.1 with ⟨M, aM, cM ⟩,
+
+by_cases int: interlineline L M,
+{
+  rcases I1 L M int with ⟨g,gL,gM ⟩,
+  rcases LC2 g e _ with ⟨ε,gcen,ecirc ⟩ ,
+},
+
 end
